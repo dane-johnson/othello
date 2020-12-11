@@ -12,6 +12,7 @@ typedef long long int U64;
 #define BLACK_TURN 1
 
 #define GETBIT(bb, x) ((bb >> x) & 0x1)
+#define C64(x) x##ULL
 
 class Board {
 public:
@@ -19,7 +20,6 @@ public:
   Board(U64 white, U64 black, int turn);
   Board(std::string fen);
   std::string GetFen();
-  Board PlaceDisk(U64 loc);
   U64 GetOccupied();
   U64 GetVacant();
   U64 white, black;

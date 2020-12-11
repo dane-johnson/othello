@@ -89,9 +89,3 @@ U64 Board::GetOccupied() {
 U64 Board::GetVacant() {
   return ~(white | black);
 }
-
-Board Board::PlaceDisk(U64 loc) {
-  // Assume the move is legal and loc has only 1 bit set
-  
-}
-

@@ -37,7 +37,7 @@ int BitscanForward(U64 bb) {
  * @precondition bb != 0
  * @return index (0..63) of most significant one bit
  */
-int bitScanReverse(U64 bb) {
+int BitscanReverse(U64 bb) {
    const U64 debruijn64 = C64(0x03f79d71b4cb0a89);
    assert (bb != 0);
    bb |= bb >> 1; 

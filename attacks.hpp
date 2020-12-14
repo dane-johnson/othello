@@ -13,11 +13,11 @@ int BitscanForward(U64 bb);
 int BitscanReverse(U64 bb);
 
 inline U64 eastOne(U64 bb) {
-  return (bb >> 1) & ~A_FILE;
+  return (bb << 1) & ~A_FILE;
 }
 
 inline U64 westOne(U64 bb) {
-  return (bb << 1) & ~H_FILE;
+  return (bb >> 1) & ~H_FILE;
 }
 
 enum Dir{Nort, NoEa, East, SoEa, Sout, SoWe, West, NoWe};

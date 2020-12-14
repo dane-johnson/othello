@@ -73,8 +73,9 @@ void InitRayAttacks() {
   U64 east = C64(0x00000000000000FE);
   for (int f=0; f < 8; f++, east = eastOne(east)) {
     U64 e = east;
-    for (int r8 = 0; r8 < 8*8; r8 += 8, e <<= 8) {
-      rayAttacks[r8+f][East] = e;
+    for (int r = 0; r < 8; r++) {
+      rayAttacks[r*8+f][East] = e;
+      e <<= 8;
     }
   }
   // Negative attacks
@@ -82,8 +83,9 @@ void InitRayAttacks() {
   U64 soea = C64(0x0002040810204080);
   for (int f=0; f < 8; f++, soea = eastOne(soea)) {
     U64 se = soea;
-    for (int r8 = 56; r8 >= 0; r8 -= 8, se <<= 8) {
-      rayAttacks[r8+f][SoEa] = se;
+    for (int r = 7; r >= 0; r--) {
+      rayAttacks[r * 8 +f][SoEa] = se;
+      se >>= 8;
     }
   }
   // South
@@ -95,16 +97,18 @@ void InitRayAttacks() {
   U64 sowe = C64(0x0040201008040201);
   for (int f=7; f >= 0; f--, sowe = westOne(sowe)) {
     U64 sw = sowe;
-    for (int r8 = 56; r8 >= 0; r8 -= 8, sw <<= 8) {
-      rayAttacks[r8+f][SoWe] = sw;
+    for (int r = 7; r >= 0; r--) {
+      rayAttacks[r * 8 + f][SoWe] = sw;
+      sw >>= 8;
     }
   }
   // West
   U64 west = C64(0x000000000000007f);
   for (int f=7; f >= 0; f--, west = westOne(west)) {
     U64 w = west;
-    for (int r8 = 0; r8 < 8*8; r8 += 8, w >>= 1) {
-      rayAttacks[r8+f][West] = w;
+    for (int r = 0; r < 8; r++) {
+      rayAttacks[r * 8 + f][West] = w;
+      w <<= 8;
     }
   }
 }

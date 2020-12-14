@@ -3,7 +3,7 @@
 Board::Board() {
   black = 0x0000001008000000;
   white = 0x0000000810000000;
-  turn = WHITE_TURN;
+  turn = BLACK_TURN;
 }
 
 Board::Board(U64 white, U64 black, int turn) {
@@ -12,7 +12,7 @@ Board::Board(U64 white, U64 black, int turn) {
   this->turn = turn;
 }
 
-// 8/8/8/3WB3/3BW3/8/8/8 W
+// 8/8/8/3BW3/3WB3/8/8/8 B
 Board::Board(std::string fen) {
   int i = 0;
   
@@ -22,7 +22,7 @@ Board::Board(std::string fen) {
   int position = 0;
   while (fen[i] != ' ') {
     int row = position / 8;
-    int col = 7 - (position % 8);
+    int col = (position % 8);
 
     if (isdigit(fen[i])) {
       position += (fen[i] - '0');
@@ -49,7 +49,7 @@ std::string Board::GetFen() {
   std::stringstream ss;
   for (int i = 0; i < 8; i++) {
     int blanks = 0;
-    for (int j = 7; j >= 0; j--) {
+    for (int j = 0; j < 8; j++) {
       if (not GETBIT(white, (i * 8 + j)) and not GETBIT(black, (i * 8 + j))) {
 	blanks++;
       } else {

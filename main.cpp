@@ -5,7 +5,7 @@
 #include "attacks.hpp"
 
 int main() {
-  std::string standard_game("8/8/8/3WB3/3BW3/8/8/8 W");
+  std::string standard_game("8/8/8/3BW3/3WB3/8/8/8 B");
   Board board1; // Standard board
   Board board2(standard_game); // From the fen of a standard game
 

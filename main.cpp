@@ -1,10 +1,12 @@
 #include <string>
 #include <iostream>
 
+#include <string.h>
+
 #include "board.hpp"
 #include "attacks.hpp"
 
-int main() {
+void test() {
   // Test board setup and FEN
   std::string standard_game("8/8/8/3BW3/3WB3/8/8/8 B");
   Board board1; // Standard board
@@ -19,7 +21,6 @@ int main() {
   std::cout << board1.GetFen() << std::endl;
 
   // Test ray attacks
-  InitRayAttacks();
   U64 attacks_from_d5 = C64(0x925438ef38549211);
   U64 attacks_in_table = 0x0;
   attacks_in_table |= rayAttacks[36][Nort];
@@ -51,5 +52,21 @@ int main() {
   } else {
     std::cout << "Move resolution not correct!" << std::endl;
     std::cout << MakeMove(board1, 21).GetFen() << std::endl;
+  }
+}
+
+int main(int argc, char* argv[]) {
+  InitRayAttacks();
+  if (argc == 2 && strcmp(argv[1], "-t") == 0) {
+    test();
+    return 0;
+  }
+  // Play a game
+  Board board; // Standard board
+  while(true) {
+    std::cout << board.GetFen() << std::endl;
+    int space;
+    std::cin >> space;
+    board = MakeMove(board, space);
   }
 }

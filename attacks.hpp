@@ -22,5 +22,6 @@ inline U64 westOne(U64 bb) {
 
 enum Dir{Nort, NoEa, East, SoEa, Sout, SoWe, West, NoWe};
 
+Board MakeMove(Board curr, int space);
 
 #endif /* ATTACKS_H */

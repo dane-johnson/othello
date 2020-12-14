@@ -112,3 +112,74 @@ void InitRayAttacks() {
     }
   }
 }
+
+U64 attack(int space, Dir dir, U64 friendly, U64 opposed) {
+  U64 blocker, flipped;
+  bool positive;
+  switch (dir) {
+  case NoWe:
+  case Nort:
+  case NoEa:
+  case East:
+    positive = true;
+    break;
+  case SoEa:
+  case Sout:
+  case SoWe:
+  case West:
+    positive = false;
+    break;
+  }
+  U64 ray = rayAttacks[space][dir];
+  if (positive) {
+    blocker = BitscanForward(ray & friendly);
+  } else {
+    blocker = BitscanReverse(ray & friendly);
+  }
+  flipped = ray & ~(rayAttacks[blocker][dir] | C64(1) << blocker);
+  if ((flipped & opposed) == flipped) {
+    return flipped;
+  } else {
+    return 0x0;
+  }
+}
+
+Board MakeMove(Board curr, int space) {
+  Board next;
+  U64 friendly;
+  U64 opposed;
+
+  if (curr.turn == WHITE_TURN) {
+    friendly = curr.white;
+    opposed = curr.black;
+    next.turn = BLACK_TURN;
+  } else {
+    friendly = curr.black;
+    opposed = curr.white;
+    next.turn = WHITE_TURN;
+  }
+
+  // Do all attacks
+  U64 flipped = 0x0;
+  flipped |= attack(space, Nort, friendly, opposed);
+  flipped |= attack(space, NoEa, friendly, opposed);
+  flipped |= attack(space, East, friendly, opposed);
+  flipped |= attack(space, SoEa, friendly, opposed);
+  flipped |= attack(space, Sout, friendly, opposed);
+  flipped |= attack(space, SoWe, friendly, opposed);
+  flipped |= attack(space, West, friendly, opposed);
+  flipped |= attack(space, NoWe, friendly, opposed);
+
+  opposed &= ~(flipped);
+  friendly |= flipped | C64(1) << space;
+
+  if (curr.turn == WHITE_TURN) {
+    next.white = friendly;
+    next.black = opposed;
+  } else {
+    next.black = friendly;
+    next.white = opposed;
+  }
+
+  return next;
+}

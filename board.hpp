@@ -6,7 +6,7 @@
 #include <ctype.h>
 #include <string.h>
 
-typedef long long int U64;
+typedef unsigned long long int U64;
 
 #define WHITE_TURN 0
 #define BLACK_TURN 1

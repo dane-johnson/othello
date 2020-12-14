@@ -1,6 +1,6 @@
 #include "attacks.hpp"
 
-enum Dir{Nort, NoEa, East, SoEa, Sout, SoWe, West, NoWe};
+U64 rayAttacks[64][8];
 
 const int index64[64] = {
   0,  1, 48,  2, 57, 49, 28,  3,
@@ -39,7 +39,6 @@ int BitscanForward(U64 bb) {
  */
 int BitscanReverse(U64 bb) {
    const U64 debruijn64 = C64(0x03f79d71b4cb0a89);
-   assert (bb != 0);
    bb |= bb >> 1; 
    bb |= bb >> 2;
    bb |= bb >> 4;
@@ -52,6 +51,13 @@ int BitscanReverse(U64 bb) {
 void InitRayAttacks() {
   // Positive attacks
   // NorthWest
+  U64 nowe = C64(0x0102040810204000);
+  for (int f=7; f >= 0; f--, nowe = westOne(nowe)) {
+    U64 nw = nowe;
+    for(int r8 = 0; r8 < 8*8; r8 += 8, nw <<= 8) {
+      rayAttacks[r8+f][NoWe] = nw;
+    }
+  }
   // North
   U64 nort = C64(0x0101010101010100);
   for (int sq=0; sq < 64; sq++, nort <<= 1)
@@ -64,5 +70,41 @@ void InitRayAttacks() {
       rayAttacks[r8+f][NoEa] = ne;
   }
   // East
+  U64 east = C64(0x00000000000000FE);
+  for (int f=0; f < 8; f++, east = eastOne(east)) {
+    U64 e = east;
+    for (int r8 = 0; r8 < 8*8; r8 += 8, e <<= 8) {
+      rayAttacks[r8+f][East] = e;
+    }
+  }
   // Negative attacks
+  // SouthEast
+  U64 soea = C64(0x0002040810204080);
+  for (int f=0; f < 8; f++, soea = eastOne(soea)) {
+    U64 se = soea;
+    for (int r8 = 56; r8 >= 0; r8 -= 8, se <<= 8) {
+      rayAttacks[r8+f][SoEa] = se;
+    }
+  }
+  // South
+  U64 sout = C64(0x0080808080808080);
+  for (int sq=63; sq >= 0; sq--, sout >>= 1) {
+    rayAttacks[sq][Sout] = sout;
+  }
+  // SouthWest
+  U64 sowe = C64(0x0040201008040201);
+  for (int f=7; f >= 0; f--, sowe = westOne(sowe)) {
+    U64 sw = sowe;
+    for (int r8 = 56; r8 >= 0; r8 -= 8, sw <<= 8) {
+      rayAttacks[r8+f][SoWe] = sw;
+    }
+  }
+  // West
+  U64 west = C64(0x000000000000007f);
+  for (int f=7; f >= 0; f--, west = westOne(west)) {
+    U64 w = west;
+    for (int r8 = 0; r8 < 8*8; r8 += 8, w >>= 1) {
+      rayAttacks[r8+f][West] = w;
+    }
+  }
 }

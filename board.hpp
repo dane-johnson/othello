@@ -14,6 +14,9 @@ typedef long long int U64;
 #define GETBIT(bb, x) ((bb >> x) & 0x1)
 #define C64(x) x##ULL
 
+#define A_FILE C64(0x0101010101010101)
+#define H_FILE C64(0x8080808080808080)
+
 class Board {
 public:
   Board();

@@ -5,6 +5,7 @@
 
 #include "board.hpp"
 #include "attacks.hpp"
+#include "move_generation.hpp"
 
 void test() {
   // Test board setup and FEN
@@ -67,6 +68,17 @@ int main(int argc, char* argv[]) {
     std::cout << board.GetFen() << std::endl;
     int space;
     std::cin >> space;
-    board = MakeMove(board, space);
+    bool legal = false;
+    for (int move : GenerateMoves(board)) {
+      if (space == move) {
+	legal = true;
+	break;
+      }
+    }
+    if (legal) {
+      board = MakeMove(board, space);
+    } else {
+      std::cout << "Illegal move!" << std::endl;
+    }
   }
 }

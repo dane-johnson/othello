@@ -2,6 +2,7 @@
 #include <iostream>
 
 #include <string.h>
+#include <unistd.h>
 
 #include "board.hpp"
 #include "attacks.hpp"
@@ -22,7 +23,8 @@ void test() {
   std::cout << board1.GetFen() << std::endl;
 
   // Test ray attacks
-  U64 attacks_from_d5 = C64(0x925438ef38549211);
+  InitRayAttacks();
+  U64 attacks_from_e5 = C64(0x925438ef38549211);
   U64 attacks_in_table = 0x0;
   attacks_in_table |= rayAttacks[36][Nort];
   attacks_in_table |= rayAttacks[36][NoEa];
@@ -32,11 +34,11 @@ void test() {
   attacks_in_table |= rayAttacks[36][SoWe];
   attacks_in_table |= rayAttacks[36][West];
   attacks_in_table |= rayAttacks[36][NoWe];
-  if (attacks_from_d5 == attacks_in_table) {
+  if (attacks_from_e5 == attacks_in_table) {
     std::cout << "Attacks are correct!" << std::endl;
   } else {
     std::cout << "Attacks are wrong!" << std::endl;
-    Board good(attacks_from_d5, 0x0, 0);
+    Board good(attacks_from_e5, 0x0, 0);
     Board bad(attacks_in_table, 0x0, 0);
     std::cout << good.GetFen() << std::endl;
     std::cout << bad.GetFen() << std::endl;
@@ -57,12 +59,16 @@ void test() {
 }
 
 int main(int argc, char* argv[]) {
-  InitRayAttacks();
-  if (argc == 2 && strcmp(argv[1], "-t") == 0) {
-    test();
-    return 0;
+  int opt;
+  while( (opt = getopt(argc, argv, "t")) > 0) {
+    switch (opt) {
+    case 't':
+      test();
+      return 0;
+    }
   }
   // Play a game
+  InitRayAttacks();
   Board board; // Standard board
   while(true) {
     std::cout << board.GetFen() << std::endl;

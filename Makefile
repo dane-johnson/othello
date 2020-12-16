@@ -1,6 +1,8 @@
 CXXFLAGS = -g
 
 .PHONY: all
-all: othello
+all: othello gui
 othello: board.o attacks.o move_generation.o main.o
 	$(CXX) $(CXXFLAGS) -o $@ $^
+gui: gui.scm
+	chicken-csc gui.scm

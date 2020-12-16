@@ -61,11 +61,12 @@
 (define (io-queue)
   (tk/after 100
 	    (lambda ()
-	      (let ([fen (read-line fin)])
+	      (let redo ([fen (read-line fin)])
 		(display fen)
 		(newline)
-		(when (not (or (string=? fen "") (string=? fen "Illegal move!")))
-		  (parse-fen fen))))))
+		(if (string=? fen "Illegal move!")
+		    (redo (read-line fin))
+		    (parse-fen fen))))))
 (io-queue)
 
 (tk-event-loop)

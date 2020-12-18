@@ -1,13 +1,28 @@
-CXXFLAGS = -g
+CXXFLAGS = -g -O3
+
+SRCS = $(wildcard *.cpp)
+HDRS = $(wildcard *.hpp) $(wildcard ./agents/*.hpp)
+OBJS = $(patsubst %.cpp,./build/%.o,$(SRCS))
+AGNT_SRCS = $(wildcard ./agents/*.cpp)
+AGNT_OBJS = $(patsubst %.cpp,%.o,$(AGNT_SRCS))
 
 .PHONY: all clean
 all: othello
-othello: board.o attacks.o move_generation.o main.o
+
+build:
+	mkdir -p build
+
+agents/%.o: agents/%.cpp $(HDRS)
+	$(CXX) -c $(CXXFLAGS) -o $@ $<
+
+build/%.o: %.cpp $(HDRS)
+	$(CXX) -c $(CXXFLAGS) -o $@ $<
+
+othello: $(OBJS) $(AGNT_OBJS)
 	$(CXX) $(CXXFLAGS) -o $@ $^
 
 gui: gui.scm
 	chicken-csc -static gui.scm
 
 clean:
-	rm othello
-	rm *.o
+	rm -f othello build/*.o agents/*.o

@@ -160,6 +160,13 @@ Board MakeMove(Board curr, int space) {
   U64 friendly;
   U64 opposed;
 
+  if (space == -1) {
+    next.white = curr.white;
+    next.black = curr.black;
+    next.turn = (curr.turn == WHITE_TURN ? BLACK_TURN : WHITE_TURN);
+    return next;
+  }
+
   if (curr.turn == WHITE_TURN) {
     friendly = curr.white;
     opposed = curr.black;

@@ -15,7 +15,7 @@ Board::Board(U64 white, U64 black, int turn) {
 // 8/8/8/3BW3/3WB3/8/8/8 B
 Board::Board(std::string fen) {
   int i = 0;
-  
+
   // Read board
   white = 0;
   black = 0;
@@ -26,7 +26,7 @@ Board::Board(std::string fen) {
 
     if (isdigit(fen[i])) {
       position += (fen[i] - '0');
-    } else if (fen[i] == 'W'){
+    } else if (fen[i] == 'W') {
       white |= 1ULL << (row * 8 + col);
       position++;
     } else if (fen[i] == 'B') {
@@ -51,17 +51,17 @@ std::string Board::GetFen() {
     int blanks = 0;
     for (int j = 0; j < 8; j++) {
       if (not GETBIT(white, (i * 8 + j)) and not GETBIT(black, (i * 8 + j))) {
-	blanks++;
+        blanks++;
       } else {
-	if (blanks > 0) {
-	  ss << (char)('0' + blanks);
-	  blanks = 0;
-	}
-	if (GETBIT(white, (i * 8 + j))) {
-	  ss << 'W';
-	} else {
-	  ss << 'B';
-	}
+        if (blanks > 0) {
+          ss << (char)('0' + blanks);
+          blanks = 0;
+        }
+        if (GETBIT(white, (i * 8 + j))) {
+          ss << 'W';
+        } else {
+          ss << 'B';
+        }
       }
     }
     if (blanks > 0) {
@@ -88,4 +88,49 @@ U64 Board::GetOccupied() {
 
 U64 Board::GetVacant() {
   return ~(white | black);
+}
+
+std::string Board::toOutputString() {
+  std::stringstream ss;
+  for (int i = 0; i < 8; i++) {
+    ss << '|';
+    for (int j = 0; j < 8; j++) {
+      if (not GETBIT(white, (i * 8 + j)) and not GETBIT(black, (i * 8 + j))) {
+        ss << "\u001b[42;1m";
+        if (i * 8 + j < 10) ss << '0';
+        ss << i * 8 + j;
+      } else {
+        if (GETBIT(white, (i * 8 + j))) {
+          ss << "\u001b[47;1m" << "WW";
+        } else {
+          ss << "\u001b[40;1m" << "BB";
+        }
+      }
+      ss << "\u001b[0m";
+      ss << '|';
+    }
+    if (i < 7) {
+      ss << '\n';
+    }
+  }
+  return ss.str();
+}
+
+int Board::evaluate() {
+  if (this->turn == BLACK_TURN) {
+    return (this->blackPieces() - this->whitePieces());
+  } else {
+    return (this->blackPieces() - this->whitePieces());
+  }
+}
+
+
+
+int Board::whitePieces() {
+  return __builtin_popcountl(this->white);
+}
+
+
+int Board::blackPieces() {
+  return __builtin_popcountl(this->black);
 }

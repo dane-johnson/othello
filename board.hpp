@@ -17,6 +17,8 @@ typedef unsigned long long int U64;
 #define A_FILE C64(0x0101010101010101)
 #define H_FILE C64(0x8080808080808080)
 
+#define MAX_VALUE 1000
+
 class Board {
 public:
   Board();
@@ -26,6 +28,10 @@ public:
   U64 GetOccupied();
   U64 GetVacant();
   U64 white, black;
+  int whitePieces();
+  int blackPieces();
+  int evaluate();
+  std::string toOutputString();
   int turn;
 };
 
@@ -36,6 +42,5 @@ static inline bool operator==(const Board &b1, const Board &b2) {
 static inline bool operator!=(const Board &b1, const Board &b2) {
   return not (b1 == b2);
 }
-
 
 #endif /* BOARD_H */

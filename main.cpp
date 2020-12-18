@@ -3,10 +3,12 @@
 
 #include <string.h>
 #include <unistd.h>
+#include <stdlib.h>
 
 #include "board.hpp"
 #include "attacks.hpp"
 #include "move_generation.hpp"
+#include "agent.hpp"
 
 void test() {
   // Test board setup and FEN
@@ -58,33 +60,67 @@ void test() {
   }
 }
 
+void printHelpMessage(char* progam_name) {
+  std::cout << "Either you gave an invalid option or requested the help message.  This is an othello program made by Dane Johnson and Aaron Handleman.\n";
+  std::cout << "Usage: " << progam_name << " [-t] [-h] [-w <agent_name>] [-b <agent_name>] [-d <depth=10>]\n";
+  std::cout << "where -w sets the white agent and -b sets the black agent.  Both default to human.  Valid agents are as follows: \n";
+  std::cout << getAgentTypesDescriptions() << std::endl;
+}
+
 int main(int argc, char* argv[]) {
   int opt;
-  while( (opt = getopt(argc, argv, "t")) > 0) {
+  int depth = 10;
+  Agent* whiteAgent = getAgentOfType("Human");
+  Agent* blackAgent = getAgentOfType("Human");
+  while ( (opt = getopt(argc, argv, "thw:b:d:")) > 0) {
     switch (opt) {
     case 't':
       test();
       return 0;
+    case 'w':
+      whiteAgent = getAgentOfType(optarg);
+      break;
+    case 'b':
+      blackAgent = getAgentOfType(optarg);
+      break;
+    case 'd':
+      depth = atoi(optarg);
+      break;
+    case 'h':
+    default:
+      printHelpMessage(argv[0]);
+
     }
   }
   // Play a game
   InitRayAttacks();
   Board board; // Standard board
-  while(true) {
-    std::cout << board.GetFen() << std::endl;
-    int space;
-    std::cin >> space;
-    bool legal = false;
-    for (int move : GenerateMoves(board)) {
-      if (space == move) {
-	legal = true;
-	break;
+  bool stall = false;
+  while (true) {
+    if (GenerateMoves(board).empty()) {  //if we can't find any legal moves, check if we're already stalled.  If so, game over.
+      if (stall) {
+        break;
       }
+      stall = true; //Otherwise mark that we stalled one players turn and go to the next player's turn
+      board = MakeMove(board, -1);
+      continue;
     }
-    if (legal) {
-      board = MakeMove(board, space);
+    if (board.turn == BLACK_TURN) {
+      int move = blackAgent->findMove(board, depth);
+      board = MakeMove(board, move);
     } else {
-      std::cout << "Illegal move!" << std::endl;
+      int move = whiteAgent->findMove(board, depth);
+      board = MakeMove(board, move);
     }
+  }
+  if (board.whitePieces() > board.blackPieces()) {
+    //white wins
+    std::cout << "White played by " << whiteAgent->getName() << " beat Black played by " << blackAgent->getName() << std::endl;
+  } else if (board.whitePieces() < board.blackPieces()) {
+    //black wins
+    std::cout << "Black played by " << blackAgent->getName() << " beat White played by " << whiteAgent->getName() << std::endl;
+  } else {
+    //draw
+    std::cout << "Black played by " << blackAgent->getName() << " drew White played by " << whiteAgent->getName() << std::endl;
   }
 }

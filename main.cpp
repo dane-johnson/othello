@@ -89,7 +89,7 @@ int main(int argc, char* argv[]) {
     case 'h':
     default:
       printHelpMessage(argv[0]);
-
+      return 0;
     }
   }
   // Play a game

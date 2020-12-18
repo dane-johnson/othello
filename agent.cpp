@@ -5,7 +5,7 @@
 #include "agents/sharedhashtable.hpp"
 #include <sstream>
 
-int numAgents = 2;
+int numAgents = 4;
 Agent* agents[] = { new Human(),  new SerialPVS(), new AlphaBeta(), new SharedHashtable()};
 
 Agent* getAgentOfType(std::string string) {

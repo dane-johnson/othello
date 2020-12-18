@@ -43,4 +43,14 @@ static inline bool operator!=(const Board &b1, const Board &b2) {
   return not (b1 == b2);
 }
 
+static inline bool operator<(const Board &b1, const Board &b2) {
+  if (b1.white != b2.white) {
+    return b1.white < b2.white;
+  } else if (b1.black != b2.black){
+    return b1.black < b2.black;
+  } else {
+    return b1.turn < b2.turn;
+  }
+}
+
 #endif /* BOARD_H */

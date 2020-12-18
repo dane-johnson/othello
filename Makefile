@@ -1,4 +1,4 @@
-CXXFLAGS = -g -O3
+CXXFLAGS = -g -O3 -fopenmp
 
 SRCS = $(wildcard *.cpp)
 HDRS = $(wildcard *.hpp) $(wildcard ./agents/*.hpp)

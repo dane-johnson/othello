@@ -2,10 +2,11 @@
 #include "agents/human.hpp"
 #include "agents/serial_pvs.hpp"
 #include "agents/alphabeta.hpp"
+#include "agents/sharedhashtable.hpp"
 #include <sstream>
 
 int numAgents = 2;
-Agent* agents[] = { new Human(),  new SerialPVS(), new AlphaBeta()};
+Agent* agents[] = { new Human(),  new SerialPVS(), new AlphaBeta(), new SharedHashtable()};
 
 Agent* getAgentOfType(std::string string) {
 	for (int i = 0; i < numAgents; i++) {

@@ -59,6 +59,19 @@ void test() {
     std::cout << "Move resolution not correct!" << std::endl;
     std::cout << MakeMove(board1, 21).GetFen() << std::endl;
   }
+  // Test move resolution (again)
+  pre_move = std::string("2W5/BB6/8/8/8/8/8/8 W");
+  post_move = std::string("2W5/BW6/W7/8/8/8/8/8 B");
+  board1 = Board(pre_move);
+  board2 = Board(post_move);
+  // place a3
+  if (MakeMove(board1, 16) == board2) {
+    std::cout << "Move resolution correct!" << std::endl;
+  } else {
+    std::cout << "Move resolution not correct!" << std::endl;
+    std::cout << MakeMove(board1, 16).GetFen() << std::endl;
+  }
+  
 
   // Test top corner
   board1 = Board("8/8/8/8/8/7W/7B/8 W");

@@ -26,7 +26,7 @@ std::vector<int> GenerateMoves(Board curr) {
       return moves;
     }
   }
-  for (int sp = 0; sp < 63; sp++) {
+  for (int sp = 0; sp < 64; sp++) {
     if (GETBIT(legal_spots, sp)) moves.push_back(sp);
   }
   return moves;
@@ -49,7 +49,7 @@ std::vector<std::pair<int, Board>> GenerateMoveBoards(Board curr) {
       return moves;
     }
   }
-  for (int sp = 0; sp < 63; sp++) {
+  for (int sp = 0; sp < 64; sp++) {
     if (GETBIT(legal_spots, sp)) moves.push_back(std::pair<int, Board>(sp, MakeMove(curr, sp)));
   }
   return moves;

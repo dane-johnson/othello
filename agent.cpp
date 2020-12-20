@@ -4,10 +4,12 @@
 #include "agents/alphabeta.hpp"
 #include "agents/sharedhashtable.hpp"
 #include "agents/random.hpp"
+#include "agents/parallel_pvs.hpp"
+#include "agents/parallel_alphabeta.hpp"
 #include <sstream>
 
-int numAgents = 5;
-Agent* agents[] = { new Human(),  new SerialPVS(), new AlphaBeta(), new SharedHashtable(), new RandomAgent()};
+int numAgents = 7;
+Agent* agents[] = { new Human(),  new SerialPVS(), new AlphaBeta(), new SharedHashtable(), new RandomAgent(), new ParallelPVS(), new ParallelAlphaBeta()};
 
 Agent* getAgentOfType(std::string string) {
 	for (int i = 0; i < numAgents; i++) {

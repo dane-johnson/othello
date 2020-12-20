@@ -59,6 +59,23 @@ void test() {
     std::cout << "Move resolution not correct!" << std::endl;
     std::cout << MakeMove(board1, 21).GetFen() << std::endl;
   }
+
+  // Test top corner
+  board1 = Board("8/8/8/8/8/7W/7B/8 W");
+  auto moves = GenerateMoves(board1);
+  if (moves.size() == 1 and moves[0] == 63) {
+    std::cout << "Top corner working" << std::endl;
+  } else {
+    std::cout << "Top corner not working" << std::endl;
+  }
+  // Test wrap around
+  board1 = Board("8/8/8/6WB/8/8/8/8 W");
+  moves = GenerateMoves(board1);
+  if ( not(moves.size() == 1 and moves[0] == 32) ) {
+    std::cout << "No wrapping on edges" << std::endl;
+  } else {
+    std::cout << "Wrapping is allowed!" << std::endl;
+  }
 }
 
 void printHelpMessage(char* progam_name) {

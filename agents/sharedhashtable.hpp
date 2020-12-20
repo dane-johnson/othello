@@ -29,7 +29,7 @@ public:
   void update(const Ply &key, const int &val);
   std::mutex write_lock;
   std::map<Ply, int> table;
-  int sht(Board board, int depth, bool maximizing);
+  int sht(Board board, int depth, int alpha, int beta, bool maximizing);
 };
 
 #endif /* SHAREDHASHTABLE_H */

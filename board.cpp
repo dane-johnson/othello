@@ -1,4 +1,5 @@
 #include "board.hpp"
+#include "move_generation.hpp"
 
 Board::Board() {
   black = 0x0000001008000000;
@@ -117,14 +118,16 @@ std::string Board::toOutputString() {
 }
 
 int Board::evaluate() {
+  return 10*countMoves(*this);
+}
+
+int Board::isWinning() {
   if (this->turn == BLACK_TURN) {
     return (this->blackPieces() - this->whitePieces());
   } else {
-    return (this->blackPieces() - this->whitePieces());
+    return (this->whitePieces() - this->blackPieces());
   }
 }
-
-
 
 int Board::whitePieces() {
   return __builtin_popcountl(this->white);

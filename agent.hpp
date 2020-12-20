@@ -4,7 +4,8 @@
 #include "attacks.hpp"
 #include "move_generation.hpp"
 #include <iostream>
-#define DEBUG(...) __VA_ARGS__
+#define DEBUG(...) 
+//__VA_ARGS__
 
 class Agent {
 public:

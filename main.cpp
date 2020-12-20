@@ -9,6 +9,7 @@
 #include "attacks.hpp"
 #include "move_generation.hpp"
 #include "agent.hpp"
+#include <chrono>
 
 void test() {
   // Test board setup and FEN
@@ -70,10 +71,14 @@ void printHelpMessage(char* progam_name) {
 int main(int argc, char* argv[]) {
   int opt;
   int depth = 10;
+  bool intermediary_boards = false;
   Agent* whiteAgent = getAgentOfType("Human");
   Agent* blackAgent = getAgentOfType("Human");
-  while ( (opt = getopt(argc, argv, "thw:b:d:")) > 0) {
+  while ( (opt = getopt(argc, argv, "thw:b:d:i")) > 0) {
     switch (opt) {
+    case 'i':
+      intermediary_boards = true;
+      break;
     case 't':
       test();
       return 0;
@@ -96,7 +101,14 @@ int main(int argc, char* argv[]) {
   InitRayAttacks();
   Board board; // Standard board
   bool stall = false;
+  auto init_time = std::chrono::high_resolution_clock::now();
+  auto black_time_total = std::chrono::duration_cast<std::chrono::microseconds>(init_time - init_time);
+  auto white_time_total = std::chrono::duration_cast<std::chrono::microseconds>(init_time - init_time);
+  int white_moves = 0;
+  int black_moves = 0;
+
   while (true) {
+    if (intermediary_boards) std::cout << "intermediary_board: \n" << board.toOutputString() << std::endl;
     if (GenerateMoves(board).empty()) {  //if we can't find any legal moves, check if we're already stalled.  If so, game over.
       if (stall) {
         break;
@@ -106,10 +118,18 @@ int main(int argc, char* argv[]) {
       continue;
     }
     if (board.turn == BLACK_TURN) {
+      auto start = std::chrono::high_resolution_clock::now();
       int move = blackAgent->findMove(board, depth);
+      auto end = std::chrono::high_resolution_clock::now();
+      black_time_total += std::chrono::duration_cast<std::chrono::microseconds>(end - start);
+      black_moves++;
       board = MakeMove(board, move);
     } else {
+      auto start = std::chrono::high_resolution_clock::now();
       int move = whiteAgent->findMove(board, depth);
+      auto end = std::chrono::high_resolution_clock::now();
+      white_time_total += std::chrono::duration_cast<std::chrono::microseconds>(end - start);
+      white_moves++;
       board = MakeMove(board, move);
     }
   }
@@ -123,4 +143,7 @@ int main(int argc, char* argv[]) {
     //draw
     std::cout << "Black played by " << blackAgent->getName() << " drew White played by " << whiteAgent->getName() << std::endl;
   }
+  std::cout << "Black played by " << blackAgent->getName() << " had an average move time of " << black_time_total.count() / black_moves << " microseconds over " << black_moves << " moves" << std::endl;
+  std::cout << "White played by " << whiteAgent->getName() << " had an average move time of " << white_time_total.count() / white_moves << " microseconds over " << white_moves << " moves" << std::endl;
+  std::cout << "Final board: \n" << board.toOutputString() << std::endl;
 }

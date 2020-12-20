@@ -1,10 +1,10 @@
 #pragma once
 #include "../agent.hpp"
 
-class SerialPVS: public Agent
+class RandomAgent: public Agent
 {
 public:
-	SerialPVS();
+	RandomAgent();
 	int findMove(Board board, int depth);
 	std::string getName();
 	std::string getDescription();

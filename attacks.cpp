@@ -1,4 +1,12 @@
 #include "attacks.hpp"
+#include <iostream>
+
+void printBitboard(U64 board) {
+  for(int i = 0; i < 64; i++) {
+    std::cout << GETBIT(board, i);
+    if ((i%8) == 7) std::cout << std::endl;
+  }
+}
 
 U64 rayAttacks[64][8];
 
@@ -31,14 +39,14 @@ int BitscanForward(U64 bb) {
 }
 
 const int index64r[64] = {
-    0, 47,  1, 56, 48, 27,  2, 60,
-   57, 49, 41, 37, 28, 16,  3, 61,
-   54, 58, 35, 52, 50, 42, 21, 44,
-   38, 32, 29, 23, 17, 11,  4, 62,
-   46, 55, 26, 59, 40, 36, 15, 53,
-   34, 51, 20, 43, 31, 22, 10, 45,
-   25, 39, 14, 33, 19, 30,  9, 24,
-   13, 18,  8, 12,  7,  6,  5, 63
+  0, 47,  1, 56, 48, 27,  2, 60,
+  57, 49, 41, 37, 28, 16,  3, 61,
+  54, 58, 35, 52, 50, 42, 21, 44,
+  38, 32, 29, 23, 17, 11,  4, 62,
+  46, 55, 26, 59, 40, 36, 15, 53,
+  34, 51, 20, 43, 31, 22, 10, 45,
+  25, 39, 14, 33, 19, 30,  9, 24,
+  13, 18,  8, 12,  7,  6,  5, 63
 };
 
 /**
@@ -49,64 +57,64 @@ const int index64r[64] = {
  * @return index (0..63) of most significant one bit
  */
 int BitscanReverse(U64 bb) {
-   const U64 debruijn64 = C64(0x03f79d71b4cb0a89);
-   bb |= bb >> 1; 
-   bb |= bb >> 2;
-   bb |= bb >> 4;
-   bb |= bb >> 8;
-   bb |= bb >> 16;
-   bb |= bb >> 32;
-   return index64r[(bb * debruijn64) >> 58];
+  const U64 debruijn64 = C64(0x03f79d71b4cb0a89);
+  bb |= bb >> 1;
+  bb |= bb >> 2;
+  bb |= bb >> 4;
+  bb |= bb >> 8;
+  bb |= bb >> 16;
+  bb |= bb >> 32;
+  return index64r[(bb * debruijn64) >> 58];
 }
 
 void InitRayAttacks() {
   // Positive attacks
   // NorthWest
   U64 nowe = C64(0x0102040810204000);
-  for (int f=7; f >= 0; f--, nowe = westOne(nowe)) {
+  for (int f = 7; f >= 0; f--, nowe = westOne(nowe)) {
     U64 nw = nowe;
-    for(int r8 = 0; r8 < 8*8; r8 += 8, nw <<= 8) {
-      rayAttacks[r8+f][NoWe] = nw;
+    for (int r8 = 0; r8 < 8 * 8; r8 += 8, nw <<= 8) {
+      rayAttacks[r8 + f][NoWe] = nw;
     }
   }
   // North
   U64 nort = C64(0x0101010101010100);
-  for (int sq=0; sq < 64; sq++, nort <<= 1)
+  for (int sq = 0; sq < 64; sq++, nort <<= 1)
     rayAttacks[sq][Nort] = nort;
   // NorthEast
   U64 noea = C64(0x8040201008040200);
-  for (int f=0; f < 8; f++, noea = eastOne(noea)) {
+  for (int f = 0; f < 8; f++, noea = eastOne(noea)) {
     U64 ne = noea;
-    for (int r8 = 0; r8 < 8*8; r8 += 8, ne <<= 8)
-      rayAttacks[r8+f][NoEa] = ne;
+    for (int r8 = 0; r8 < 8 * 8; r8 += 8, ne <<= 8)
+      rayAttacks[r8 + f][NoEa] = ne;
   }
   // East
   U64 east = C64(0x00000000000000FE);
-  for (int f=0; f < 8; f++, east = eastOne(east)) {
+  for (int f = 0; f < 8; f++, east = eastOne(east)) {
     U64 e = east;
     for (int r = 0; r < 8; r++) {
-      rayAttacks[r*8+f][East] = e;
+      rayAttacks[r * 8 + f][East] = e;
       e <<= 8;
     }
   }
   // Negative attacks
   // SouthEast
   U64 soea = C64(0x0002040810204080);
-  for (int f=0; f < 8; f++, soea = eastOne(soea)) {
+  for (int f = 0; f < 8; f++, soea = eastOne(soea)) {
     U64 se = soea;
     for (int r = 7; r >= 0; r--) {
-      rayAttacks[r * 8 +f][SoEa] = se;
+      rayAttacks[r * 8 + f][SoEa] = se;
       se >>= 8;
     }
   }
   // South
   U64 sout = C64(0x0080808080808080);
-  for (int sq=63; sq >= 0; sq--, sout >>= 1) {
+  for (int sq = 63; sq >= 0; sq--, sout >>= 1) {
     rayAttacks[sq][Sout] = sout;
   }
   // SouthWest
   U64 sowe = C64(0x0040201008040201);
-  for (int f=7; f >= 0; f--, sowe = westOne(sowe)) {
+  for (int f = 7; f >= 0; f--, sowe = westOne(sowe)) {
     U64 sw = sowe;
     for (int r = 7; r >= 0; r--) {
       rayAttacks[r * 8 + f][SoWe] = sw;
@@ -115,13 +123,61 @@ void InitRayAttacks() {
   }
   // West
   U64 west = C64(0x000000000000007f);
-  for (int f=7; f >= 0; f--, west = westOne(west)) {
+  for (int f = 7; f >= 0; f--, west = westOne(west)) {
     U64 w = west;
     for (int r = 0; r < 8; r++) {
       rayAttacks[r * 8 + f][West] = w;
       w <<= 8;
     }
   }
+}
+
+U64 inline valid_neg_attack(U64 friendly, U64 opposed, U64 empty, U64 direction)
+{
+  U64 flood = friendly;  //start with our own pieces
+  flood |= ((flood << direction) & opposed);
+  flood |= ((flood << direction) & opposed);
+  flood |= ((flood << direction) & opposed);
+  flood |= ((flood << direction) & opposed);
+  flood |= ((flood << direction) & opposed);
+  flood |= ((flood << direction) & opposed);  //travel over up to 6 enemy pieces
+  flood ^= friendly; //remove out own pieces from the flood since they need to pass at least 1 enemy piece
+  flood = ((flood << direction) & empty); //only look at the values that result in an empty square.
+  return flood;
+}
+
+U64 inline valid_pos_attack(U64 friendly, U64 opposed, U64 empty, U64 direction)
+{
+  U64 flood = friendly;  //start with our own pieces
+  flood |= ((flood >> direction) & opposed);
+  flood |= ((flood >> direction) & opposed);
+  flood |= ((flood >> direction) & opposed);
+  flood |= ((flood >> direction) & opposed);
+  flood |= ((flood >> direction) & opposed);
+  flood |= ((flood >> direction) & opposed);  //travel over up to 6 enemy pieces
+  flood ^= friendly; //remove out own pieces from the flood since they need to pass at least 1 enemy piece
+  flood = ((flood >> direction) & empty); //only look at the values that result in an empty square.
+  return flood;
+}
+
+U64 valid_attacks(U64 friendly, U64 opposed, U64 empty) {
+  // std::cout << "Friendly" << std::endl;
+  // printBitboard(friendly);
+  // std::cout << "Opposed" << std::endl;
+  // printBitboard(opposed);
+  // std::cout << "Empty" << std::endl;
+  // printBitboard(empty);
+  U64 attack = valid_pos_attack(friendly, opposed, empty, _NORTH);
+  attack |= valid_pos_attack(friendly, opposed, empty, _NORTHEAST);
+  attack |= valid_pos_attack(friendly, opposed, empty, _NORTHWEST);
+  attack |= valid_pos_attack(friendly, opposed, empty, _EAST);
+  attack |= valid_neg_attack(friendly, opposed, empty, _SOUTH);
+  attack |= valid_neg_attack(friendly, opposed, empty, _SOUTHWEST);
+  attack |= valid_neg_attack(friendly, opposed, empty, _SOUTHEAST);
+  attack |= valid_neg_attack(friendly, opposed, empty, _WEST);
+  // std::cout << "Attacks" << std::endl;
+  // printBitboard(attack);
+  return attack;
 }
 
 U64 attack(int space, Dir dir, U64 friendly, U64 opposed) {

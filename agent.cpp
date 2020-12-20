@@ -3,10 +3,11 @@
 #include "agents/serial_pvs.hpp"
 #include "agents/alphabeta.hpp"
 #include "agents/sharedhashtable.hpp"
+#include "agents/random.hpp"
 #include <sstream>
 
-int numAgents = 4;
-Agent* agents[] = { new Human(),  new SerialPVS(), new AlphaBeta(), new SharedHashtable()};
+int numAgents = 5;
+Agent* agents[] = { new Human(),  new SerialPVS(), new AlphaBeta(), new SharedHashtable(), new RandomAgent()};
 
 Agent* getAgentOfType(std::string string) {
 	for (int i = 0; i < numAgents; i++) {

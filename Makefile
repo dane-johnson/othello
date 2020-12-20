@@ -1,4 +1,5 @@
 CXXFLAGS = -g -O3 -fopencilk
+LIBS = -ltbb
 
 CXX = ~/build/bin/clang++
 SRCS = $(wildcard *.cpp)
@@ -20,7 +21,7 @@ build/%.o: %.cpp $(HDRS)
 	$(CXX) -c $(CXXFLAGS) -o $@ $<
 
 othello: $(OBJS) $(AGNT_OBJS)
-	$(CXX) $(CXXFLAGS) -o $@ $^
+	$(CXX) $(LIBS) $(CXXFLAGS) -o $@ $^
 
 gui: gui.scm
 	chicken-csc -static gui.scm

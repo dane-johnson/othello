@@ -14,18 +14,21 @@ bool operator<(const Ply &l, const Ply &r) {
 }
 
 void SharedHashtable::update(const Ply &key, const int &value) {
-  write_lock.lock();
-  table[key] = value;
-  write_lock.unlock();
+  Movetable::accessor a;
+  table.insert(a, key);
+  a->second = value;
+  a.release();
 }
 
 int SharedHashtable::sht(Board board, int depth, int alpha, int beta, bool maximizing) {
   int value;
   Ply key(board, depth, maximizing);
   // See if someone has done this computation already;
-  std::map<Ply, int>::iterator it = table.find(key);
-  if (it != table.end()) {
-    return it->second;
+  Movetable::accessor a;
+  if (table.find(a, key)) {
+    return a->second;
+  } else {
+    a.release();
   }
   // See if we're bottomed out
   if (depth == 0) {

@@ -1,7 +1,7 @@
 #ifndef SHAREDHASHTABLE_H
 #define SHAREDHASHTABLE_H
 
-#include <map>
+#include <tbb/concurrent_hash_map.h>
 #include <mutex>
 #include <cilk/cilk.h>
 
@@ -19,16 +19,30 @@ struct Ply {
   }
 };
 
+struct PlyCompare {
+  static size_t hash(const Ply &p) {
+    return std::hash<U64>()(p.board.white) ^
+      std::hash<U64>()(p.board.black) ^
+      std::hash<U64>()(p.depth) ^
+      p.maximizing;
+  }
+  static bool equal(const Ply &l, const Ply &r) {
+    return l.board == r.board && l.depth == r.depth && l.maximizing == r.maximizing;
+  }
+};
+
+typedef tbb::concurrent_hash_map<Ply, int, PlyCompare> Movetable;
+
 class SharedHashtable: public Agent {
 public:
   SharedHashtable();
   int findMove(Board board, int depth);
   std::string getName();
   std::string getDescription();
-  private:
+private:
   void update(const Ply &key, const int &val);
   std::mutex write_lock;
-  std::map<Ply, int> table;
+  Movetable table;
   int sht(Board board, int depth, int alpha, int beta, bool maximizing);
 };
 

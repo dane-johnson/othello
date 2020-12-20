@@ -132,31 +132,31 @@ void InitRayAttacks() {
   }
 }
 
-U64 inline valid_neg_attack(U64 friendly, U64 opposed, U64 empty, U64 direction)
+U64 inline valid_neg_attack(U64 friendly, U64 opposed, U64 empty, U64 direction, U64 eliminate)
 {
   U64 flood = friendly;  //start with our own pieces
-  flood |= ((flood << direction) & opposed);
-  flood |= ((flood << direction) & opposed);
-  flood |= ((flood << direction) & opposed);
-  flood |= ((flood << direction) & opposed);
-  flood |= ((flood << direction) & opposed);
-  flood |= ((flood << direction) & opposed);  //travel over up to 6 enemy pieces
+  flood |= ((flood << direction) & ~eliminate & opposed);
+  flood |= ((flood << direction) & ~eliminate & opposed);
+  flood |= ((flood << direction) & ~eliminate & opposed);
+  flood |= ((flood << direction) & ~eliminate & opposed);
+  flood |= ((flood << direction) & ~eliminate & opposed);
+  flood |= ((flood << direction) & ~eliminate & opposed); //travel over up to 6 enemy pieces
   flood ^= friendly; //remove out own pieces from the flood since they need to pass at least 1 enemy piece
-  flood = ((flood << direction) & empty); //only look at the values that result in an empty square.
+  flood = ((flood << direction) & ~eliminate & empty); //only look at the values that result in an empty square.
   return flood;
 }
 
-U64 inline valid_pos_attack(U64 friendly, U64 opposed, U64 empty, U64 direction)
+U64 inline valid_pos_attack(U64 friendly, U64 opposed, U64 empty, U64 direction, U64 eliminate)
 {
   U64 flood = friendly;  //start with our own pieces
-  flood |= ((flood >> direction) & opposed);
-  flood |= ((flood >> direction) & opposed);
-  flood |= ((flood >> direction) & opposed);
-  flood |= ((flood >> direction) & opposed);
-  flood |= ((flood >> direction) & opposed);
-  flood |= ((flood >> direction) & opposed);  //travel over up to 6 enemy pieces
+  flood |= ((flood >> direction) & ~eliminate & opposed);
+  flood |= ((flood >> direction) & ~eliminate & opposed);
+  flood |= ((flood >> direction) & ~eliminate & opposed);
+  flood |= ((flood >> direction) & ~eliminate & opposed);
+  flood |= ((flood >> direction) & ~eliminate & opposed);
+  flood |= ((flood >> direction) & ~eliminate & opposed); //travel over up to 6 enemy pieces
   flood ^= friendly; //remove out own pieces from the flood since they need to pass at least 1 enemy piece
-  flood = ((flood >> direction) & empty); //only look at the values that result in an empty square.
+  flood = ((flood >> direction) & ~eliminate & empty); //only look at the values that result in an empty square.
   return flood;
 }
 
@@ -167,14 +167,15 @@ U64 valid_attacks(U64 friendly, U64 opposed, U64 empty) {
   // printBitboard(opposed);
   // std::cout << "Empty" << std::endl;
   // printBitboard(empty);
-  U64 attack = valid_pos_attack(friendly, opposed, empty, _NORTH);
-  attack |= valid_pos_attack(friendly, opposed, empty, _NORTHEAST);
-  attack |= valid_pos_attack(friendly, opposed, empty, _NORTHWEST);
-  attack |= valid_pos_attack(friendly, opposed, empty, _EAST);
-  attack |= valid_neg_attack(friendly, opposed, empty, _SOUTH);
-  attack |= valid_neg_attack(friendly, opposed, empty, _SOUTHWEST);
-  attack |= valid_neg_attack(friendly, opposed, empty, _SOUTHEAST);
-  attack |= valid_neg_attack(friendly, opposed, empty, _WEST);
+  U64 attack = C64(0x0);
+  attack |= valid_pos_attack(friendly, opposed, empty, _NORTH, 0);
+  attack |= valid_pos_attack(friendly, opposed, empty, _NORTHEAST, H_FILE);
+  attack |= valid_pos_attack(friendly, opposed, empty, _NORTHWEST, A_FILE);
+  attack |= valid_pos_attack(friendly, opposed, empty, _EAST, H_FILE);
+  attack |= valid_neg_attack(friendly, opposed, empty, _SOUTH, 0);
+  attack |= valid_neg_attack(friendly, opposed, empty, _SOUTHWEST, A_FILE);
+  attack |= valid_neg_attack(friendly, opposed, empty, _SOUTHEAST, H_FILE);
+  attack |= valid_neg_attack(friendly, opposed, empty, _WEST, A_FILE);
   // std::cout << "Attacks" << std::endl;
   // printBitboard(attack);
   return attack;

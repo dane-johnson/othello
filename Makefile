@@ -1,5 +1,6 @@
-CXXFLAGS = -g -O3 -fopenmp
+CXXFLAGS = -g -O3 -fopencilk
 
+CXX = ~/build/bin/clang++
 SRCS = $(wildcard *.cpp)
 HDRS = $(wildcard *.hpp) $(wildcard ./agents/*.hpp)
 OBJS = $(patsubst %.cpp,./build/%.o,$(SRCS))

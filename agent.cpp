@@ -15,6 +15,7 @@ Agent* getAgentOfType(std::string string) {
 			return agents[i];
 		}
 	}
+	return agents[0];
 }
 
 std::string getAgentTypesDescriptions() {

@@ -3,7 +3,7 @@
 
 #include <map>
 #include <mutex>
-#include <omp.h>
+#include <cilk/cilk.h>
 
 #include "../agent.hpp"
 

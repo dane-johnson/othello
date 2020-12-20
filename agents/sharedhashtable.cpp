@@ -43,12 +43,12 @@ int SharedHashtable::sht(Board board, int depth, bool maximizing) {
   if (maximizing) {
     value = -MAX_VALUE;
     for (int move : moves) {
-      value = std::max(value, sht(MakeMove(board, move), depth -1, false));
+      value = std::max(value, sht(MakeMove(board, move), depth - 1, false));
     }
   } else {
     value = MAX_VALUE;
     for (int move : moves) {
-      value = std::min(value, sht(MakeMove(board, move), depth -1, false));
+      value = std::min(value, sht(MakeMove(board, move), depth - 1, false));
     }
   }
   update(key, value);
@@ -58,19 +58,16 @@ int SharedHashtable::sht(Board board, int depth, bool maximizing) {
 int SharedHashtable::findMove(Board board, int depth) {
   std::vector<int> moves = GenerateMoves(board);
   // Send off other threads to fill out the table
-  #pragma omp parallel
-  {
-    for (int move : moves) {
-      sht(MakeMove(board, move), depth -1, true);
-    }
+  cilk_for (int i = 0; i < moves.size(); i++) {
+    sht(MakeMove(board, moves[i]), depth - 1, true);
   }
-  int best_value = -MAX_VALUE -1;
+  int best_value = -MAX_VALUE - 1;
   int best_move = -1;
-  for (int move : moves) {
-    int value = sht(MakeMove(board, move), depth -1, true);
+  cilk_for (int i = 0; i < moves.size(); i++) {
+    int value = sht(MakeMove(board, moves[i]), depth - 1, true);
     if (value > best_value) {
       best_value = value;
-      best_move = move;
+      best_move = moves[i];
     }
   }
   return best_move;

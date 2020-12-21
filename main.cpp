@@ -139,11 +139,12 @@ int main(int argc, char* argv[]) {
 
   while (true) {
     if (intermediary_boards) std::cout << "intermediary_board: \n" << board.toOutputString() << std::endl;
-    if (GenerateMoves(board).empty()) {  //if we can't find any legal moves, check if we're already stalled.  If so, game over.
-      if (stall) {
-        break;
-      }
-      stall = true; //Otherwise mark that we stalled one players turn and go to the next player's turn
+    auto lgl_moves = GenerateMoves(board);
+    if (lgl_moves.empty()) {  //if we can't find any legal moves, check if we're already stalled.  If so, game over.
+      break;
+    }
+    if (lgl_moves[0] == -1) 
+    {
       board = MakeMove(board, -1);
       continue;
     }

@@ -9,6 +9,14 @@ int countMoves(Board curr) {
   }
 }
 
+int countOpponentMoves(Board curr) {
+  if (curr.turn == BLACK_TURN) {
+    return __builtin_popcountl(valid_attacks(curr.white, curr.black, ~(curr.white | curr.black)));
+  } else {
+    return __builtin_popcountl(valid_attacks(curr.black, curr.white, ~(curr.white | curr.black)));
+  }
+}
+
 std::vector<int> GenerateMoves(Board curr) {
   // This is super dumb
   U64 legal_spots;

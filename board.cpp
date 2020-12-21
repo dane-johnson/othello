@@ -132,7 +132,7 @@ std::string Board::toOutputString() {
 }
 
 int Board::evaluate() {
-  return 10*countMoves(*this);
+  return 10*(countMoves(*this) - countOpponentMoves(*this));
 }
 
 int Board::isWinning() {

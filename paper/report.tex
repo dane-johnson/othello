@@ -83,7 +83,7 @@ of that branch terminates early.
   \Else
   \State $score \gets -\infty$
   \ForAll{$c$, children of $node$}
-  \State $score \gets -$ \Call{Max}{$score$, \Call{Minimax}{$c, depth -1, -\beta, -\alpha$}}
+  \State $score \gets -$ \Call{Max}{$score$, \Call{AlphaBeta}{$c, depth -1, -\beta, -\alpha$}}
   \State $\alpha \gets $ \Call{Max}{$score, \alpha$}
   \If{$\alpha \geq \beta$}
   \Comment {$\beta$ cutoff}
@@ -108,16 +108,14 @@ pruning.
   \Else
   \ForAll{$c$, children of $node$}
   \If{$c$ is the ``Principal Variation''}
-  \State $score \gets -$ \Call{Max}{$score$, \Call{Minimax}{$c, depth -1, -\beta, -\alpha$}}
+  \State $score \gets -$ \Call{Max}{$score$, \Call{PVS}{$c, depth -1, -\beta, -\alpha$}}
   \Else
-  \State $score \gets -$ \Call{Max}{$score$, \Call{Minimax}{$c, depth -1, -\alpha -1, -\alpha$}}
+  \State $score \gets -$ \Call{Max}{$score$, \Call{PVS}{$c, depth -1, -\alpha -1, -\alpha$}}
   \Comment Scout window
   \If {$\alpha < score$}
   \EndIf
-    \State $score \gets -$ \Call{Max}{$score$, \Call{Minimax}{$c, depth -1, -\beta, -\alpha$}}
-    
+    \State $score \gets -$ \Call{Max}{$score$, \Call{PVS}{$c, depth -1, -\beta, -\alpha$}}
   \EndIf
-
   \State $\alpha \gets $ \Call{Max}{$score, \alpha$}
   \If{$\alpha \geq \beta$}
   \Comment {$\beta$ cutoff}
@@ -129,11 +127,51 @@ pruning.
   \EndProcedure
 \end{algorithmic}
 
+\subsection{Shared Hashtable}
+Shared hashtable is a naive approach to adding parallelism to Game-tree search. We send of multiple agents
+to search the space, and cache results in a table. This allows for parallelism without the need for any added
+implementation complexity.
+
+\subsection{Jamboree}
+Jamboree is a parallel version of PVS. It utilizes the ``Young Brothers Wait'' concept, the idea that parallelism
+should be saved until it is needed and that searching the principal variation is inherently serial \cite[jamb].
+Parallelism is used for scouting once the principal variation is searched, and any later variations that fail
+the scout are searched in serial as well.
+\begin{algorithmic}[1]
+  \Procedure{Jamboree}{$node, depth, \alpha, \beta$}
+  \If{$depth = 0$}
+  \State \Return \Call{Eval}{$node$}
+  \Else
+  \State $score \gets -$ \Call{Max}{$score$, \Call{Jamboree}{$pv, depth -1, -\beta, -\alpha$}}
+  \Comment{Search the ``Principal Variation''}
+  \ForAll{$c$, children of $node$}
+  \Comment{In parallel}
+  \State $score \gets -$ \Call{Max}{$score$, \Call{Jamboree}{$c, depth -1, -\alpha -1, -\alpha$}}
+  \Comment Scout window
+  \If {$\alpha < score$}
+  \State Wait for all previous parallel iterations to finish
+  \State $score \gets -$ \Call{Max}{$score$, \Call{Jamboree}{$c, depth -1, -\beta, -\alpha$}}
+  \EndIf
+  \State $\alpha \gets $ \Call{Max}{$score, \alpha$}
+  \If{$\alpha \geq \beta$}
+  \Comment {$\beta$ cutoff}
+  \State Break
+  \EndIf
+  \EndFor
+  \State \Return $\alpha$
+  \EndIf
+  \EndProcedure
+\end{algorithmic}
 \begin{thebibliography}{9}
 \bibitem{cpw}
   Various Authors,
   \textit{The Chess Programming Wiki},
   www.chessprogramming.org
+\bibitem{jamb}
+  C. F. Joerg and B.C. Kuszmaul.
+  Massively Parallel Chess.
+  \textit{DIMACS '94}
+  October 1994.
 \end{thebibliography}
 
 \end{document}

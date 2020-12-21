@@ -1,6 +1,7 @@
 #include "jamboree.hpp"
 
 #include <cilk/cilk.h>
+#include <cilk/reducer_max.h>
 
 #include <algorithm>
 
@@ -65,15 +66,17 @@ int jamboree(Board board, int depth, int alpha, int beta) {
 }
 
 int Jamboree::findMove(Board board, int depth) {
-  int best_value = -MAX_VALUE -1;
-  int best_move = -1;
-  std::vector<std::pair<int, Board>> moves = GenerateMoveBoards(board);
-  for (std::pair<int, Board> move_pair : moves) {
-    int value = -jamboree(move_pair.second, depth -1, best_value, MAX_VALUE);
-    if (value > best_value) {
-      best_value = value;
-      best_move = move_pair.first;
-    }
+  DEBUG(int failed_scouts = 0;)
+    DEBUG(int scouts = 0;)
+    DEBUG(int nodes = 0;)
+    std::vector<std::pair<int, Board>> moves = GenerateMoveBoards(board);
+  cilk::reducer< cilk::op_max_index<int, int> > best_move; //soooo this is being misused a bit, but basically we do a max reducer in order to find the best move.  This is supposed to be for an index, but no reason it can't store the move instead
+  cilk_for (int i = 0; i < moves.size(); i++) {
+    std::pair<int, Board> move_pair = moves[i];
+    int score = -jamboree(std::get<Board>(move_pair), depth - 1, -MAX_VALUE - 1, MAX_VALUE + 1);
+    best_move->calc_max(std::get<int>(move_pair), score);
   }
-  return best_move;
+  DEBUG(printf("%d nodes searched.  Failed %d scouts out of %d scouts\n", nodes, failed_scouts, scouts);)
+    DEBUG(std::cout << std::flush;)
+    return best_move->get_index_reference();
 }

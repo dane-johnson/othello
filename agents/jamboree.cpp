@@ -61,6 +61,9 @@ int jamboree(Board board, int depth, int alpha, int beta) {
   for (int i = 0; i < moves.size() - 1; i++) {
     std::pair<int, Board> move = moves[i + 1];
     if (scouts[i] > value) {
+      value = scouts[i];
+    }
+    if (scouts[i] > alpha) {
       value = std::max(value, -jamboree(move.second, depth -1, -beta, -alpha));
       alpha = std::max(alpha, value);
       if (alpha >= beta) { // Beta cutoff

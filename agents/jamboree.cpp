@@ -17,7 +17,7 @@ std::string Jamboree::getDescription() {
 }
 
 bool jambcompare(std::pair<int, Board> l, std::pair<int, Board> r) {
-  return l.second.evaluate() < l.second.evaluate();
+  return l.second.evaluate() < r.second.evaluate();
 }
 
 int jamboree(Board board, int depth, int alpha, int beta) {

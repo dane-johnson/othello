@@ -4,9 +4,9 @@ algorithms=${1:-ParallelPVS,ParallelAlphaBeta,Jamboree,SerialPVS,AlphaBeta}
 depths=${2:-12,13,14}
 work=100
 runs=50000
-for ((i = 0; i < 5; i++))
+for ((i = 0; i < 1; i++))
 do
-for ((depth = 8; depth <=12; depth += 1))
+for ((depth = 8; depth <=10; depth += 1))
 do
 for algorithm in $(echo $algorithms | sed "s/,/ /g")
 do

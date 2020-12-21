@@ -1,5 +1,6 @@
 #include "board.hpp"
 #include "move_generation.hpp"
+#include "attacks.hpp"
 
 Board::Board() {
   black = 0x0000001008000000;
@@ -93,11 +94,24 @@ U64 Board::GetVacant() {
 
 std::string Board::toOutputString() {
   std::stringstream ss;
+  U64 self, other, empty;
+  empty = this->GetVacant();
+  if (this->turn == WHITE_TURN) {
+    self = white;
+    other = black;
+  } else {
+    self = black;
+    other = white;
+  }
   for (int i = 0; i < 8; i++) {
     ss << '|';
     for (int j = 0; j < 8; j++) {
       if (not GETBIT(white, (i * 8 + j)) and not GETBIT(black, (i * 8 + j))) {
-        ss << "\u001b[42;1m";
+        if (GETBIT(valid_attacks(self,other,empty), (i * 8 + j))) {
+          ss << "\u001b[42;1m";
+        } else {
+          ss << "\u001b[41;1m";
+        }
         if (i * 8 + j < 10) ss << '0';
         ss << i * 8 + j;
       } else {
@@ -118,7 +132,7 @@ std::string Board::toOutputString() {
 }
 
 int Board::evaluate() {
-  return 10*countMoves(*this);
+  return 10*(countMoves(*this) - countOpponentMoves(*this));
 }
 
 int Board::isWinning() {

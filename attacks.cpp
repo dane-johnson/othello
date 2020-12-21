@@ -199,6 +199,9 @@ U64 attack(int space, Dir dir, U64 friendly, U64 opposed) {
     break;
   }
   U64 ray = rayAttacks[space][dir];
+  if ((ray & friendly) == 0) {
+    return C64(0x0);
+  }
   if (positive) {
     blocker = BitscanForward(ray & friendly);
   } else {

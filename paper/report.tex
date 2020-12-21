@@ -1,0 +1,188 @@
+\documentclass[]{article}
+
+\usepackage{fixltx2e}
+
+\usepackage{skak}
+
+\usepackage{algpseudocode}
+
+\usepackage{hyperref}
+
+\MakeRobust{\Call}
+
+\author{Dane Johnson and Aaron Handlman}
+\date{12-21-2020}
+\title{Othello and Parallel Game-tree Search}
+
+\begin{document}
+\maketitle
+
+\section{Introduction}
+The game of Chess has always been captivating to game enthusiasts, and doubly so to computer scientists.
+Aaron and I were the latest in a laundry list of computer scientists who became interested in the game.
+Given that our research is in parallel computing, and seeing as we needed a project for this course, it
+was only natural that we decided to investigate how parallelism could be applied to the great game.
+\\ \\
+Game-tree search soon became our primary area of concern. It is an inherently serial algorithm,
+challenging to extend to multiple workers. With the intent to focus on search algorithms, we gravitated
+away from Chess towards Othello, a simpler game with only one type of piece. With this new interest,
+we decided our project would be one of implementation and analysis, the prospect of creating an entire
+Othello engine from scratch was a much more tractable problem.
+\\ \\
+Thanks in no small part to the Chess Programming Wiki \cite{cpw}, we were able to find a wide variety
+of Game-tree search algorithms to implement, and benchmark against each other for runtime and
+scalability.
+\section{Othello}
+Othello, or Reversi, is a game played by two players on an 8x8 grid, the same dimensions
+of a Chess board (and I will therefore use a Chess board to demonstrate the game), with disks that
+are white on one side and black on the other.
+The game is played by placing a disk of the player's color on the board, then flipping
+any disks that are sandwiched between and existing player's piece and the new one.
+With only a single type of move, Othello is a much easier engine to implement than Chess, but Game-tree
+search algorithms should be just as, if not more, effective at playing the game.
+\begin{figure}
+  \caption{The standard Othello start position}
+  \centering
+  \newgame
+\fenboard{8/8/8/3pP3/3Pp3/8/8/8 w - - 0 20}
+\showboard
+\end{figure}
+
+\begin{figure}
+  \caption{Play progresses after Black plays e6}
+  \centering
+  \newgame
+\fenboard{8/8/4p3/3pp3/3Pp3/8/8/8 w - - 0 20}
+\showboard
+\end{figure}
+
+\section{Algorithms}
+\subsection{Game-tree Search (Minimax)}
+The core of Game-tree search is looking through the search space trying to find the move that maximizes
+your chances of victory, under the assumption that your opponent will do the same in the opposite direction.
+Since theses spaces are intractably large, we choose some maximal depth, nodes searched, or time spent looking
+and then evaluate the board via some criteria (in Othello, how many more moves we have than our opponent).
+\begin{algorithmic}[1]
+  \Procedure{Minimax}{$node, depth$}
+  \If{$depth = 0$}
+  \State \Return \Call{Eval}{$node$}
+  \Else
+  \State $score \gets -\infty$
+  \ForAll{$c$, children of $node$}
+  \State $score \gets -$ \Call{Max}{$score$, \Call{Minimax}{$c, depth -1$}}
+  \EndFor
+  \State \Return $score$
+  \EndIf
+  \EndProcedure
+\end{algorithmic}
+\subsection{Alpha-Beta Pruning}
+Alpha-Beta pruning improves Game-tree search by keeping track of the highest and lowest values that
+are guaranteed to each player. If a move is found to be worse than a score guaranteed by these values, the search
+of that branch terminates early.
+\begin{algorithmic}[1]
+  \Procedure{AlphaBeta}{$node, depth, \alpha, \beta$}
+  \If{$depth = 0$}
+  \State \Return \Call{Eval}{$node$}
+  \Else
+  \State $score \gets -\infty$
+  \ForAll{$c$, children of $node$}
+  \State $score \gets -$ \Call{Max}{$score$, \Call{AlphaBeta}{$c, depth -1, -\beta, -\alpha$}}
+  \State $\alpha \gets $ \Call{Max}{$score, \alpha$}
+  \If{$\alpha \geq \beta$}
+  \Comment {$\beta$ cutoff}
+  \State Break
+  \EndIf
+  \EndFor
+  \State \Return $score$
+  \EndIf
+  \EndProcedure
+\end{algorithmic}
+
+\subsection{Principal Variation Search}
+PVS improves further on Alpha-Beta pruning by assuming that the first child of a node
+is it's ``Principal Variation'', and that it is likely to be the best choice. It runs a
+search on the other children with a narrow window (the Scout window), so they will cut off if they generate
+a value that is smaller than the principle variation. This allows for even more aggressive
+pruning.
+\begin{algorithmic}[1]
+  \Procedure{PVS}{$node, depth, \alpha, \beta$}
+  \If{$depth = 0$}
+  \State \Return \Call{Eval}{$node$}
+  \Else
+  \ForAll{$c$, children of $node$}
+  \If{$c$ is the ``Principal Variation''}
+  \State $score \gets -$ \Call{Max}{$score$, \Call{PVS}{$c, depth -1, -\beta, -\alpha$}}
+  \Else
+  \State $score \gets -$ \Call{Max}{$score$, \Call{PVS}{$c, depth -1, -\alpha -1, -\alpha$}}
+  \Comment Scout window
+  \If {$\alpha < score$}
+  \EndIf
+    \State $score \gets -$ \Call{Max}{$score$, \Call{PVS}{$c, depth -1, -\beta, -\alpha$}}
+  \EndIf
+  \State $\alpha \gets $ \Call{Max}{$score, \alpha$}
+  \If{$\alpha \geq \beta$}
+  \Comment {$\beta$ cutoff}
+  \State Break
+  \EndIf
+  \EndFor
+  \State \Return $\alpha$
+  \EndIf
+  \EndProcedure
+\end{algorithmic}
+
+\subsection{Shared Hashtable}
+Shared hashtable is a naive approach to adding parallelism to Game-tree search. We send of multiple agents
+to search the space, and cache results in a table. This allows for parallelism without the need for any added
+implementation complexity.
+
+\subsection{Jamboree}
+Jamboree is a parallel version of PVS. It utilizes the ``Young Brothers Wait'' concept, the idea that parallelism
+should be saved until it is needed and that searching the principal variation is inherently serial \cite[jamb].
+Parallelism is used for scouting once the principal variation is searched, and any later variations that fail
+the scout are searched in serial as well.
+\begin{algorithmic}[1]
+  \Procedure{Jamboree}{$node, depth, \alpha, \beta$}
+  \If{$depth = 0$}
+  \State \Return \Call{Eval}{$node$}
+  \Else
+  \State $score \gets -$ \Call{Max}{$score$, \Call{Jamboree}{$pv, depth -1, -\beta, -\alpha$}}
+  \Comment{Search the ``Principal Variation''}
+  \ForAll{$c$, children of $node$}
+  \Comment{In parallel}
+  \State $score \gets -$ \Call{Max}{$score$, \Call{Jamboree}{$c, depth -1, -\alpha -1, -\alpha$}}
+  \Comment Scout window
+  \If {$\alpha < score$}
+  \State Wait for all previous parallel iterations to finish
+  \State $score \gets -$ \Call{Max}{$score$, \Call{Jamboree}{$c, depth -1, -\beta, -\alpha$}}
+  \EndIf
+  \State $\alpha \gets $ \Call{Max}{$score, \alpha$}
+  \If{$\alpha \geq \beta$}
+  \Comment {$\beta$ cutoff}
+  \State Break
+  \EndIf
+  \EndFor
+  \State \Return $\alpha$
+  \EndIf
+  \EndProcedure
+\end{algorithmic}
+
+\section{Implementation Details}
+Our implementation was written in C++ using the Cilk runtime and compiled with the Tapir Cilk compiler.  We ran our benchmarks to test both Shared Hashtable and Jamboree, as well as a naive parallel implementation of AlphaBeta and PVS which simply parallelized the root node.  In order to reduce spawn overhead, we limited parallelization for Jamboree to the first $\log(P)$ levels as our experimental results showed that parallelization past that caused significant slowdown due to the exponential nature of the tree.  We focused our performance engineering on the evaluation of the leaf nodes, as this had a far greater impact on the overall performance.  For our evaluation function, we chose to use the number of legal moves for the current player minus the number of moves for the opposing player.  This is very effective for a simple evaluation function that doesn't require significant tuning, as in Othello having a large number of moves typically means that you have the ability to take control of move of the board.  Unlike many games, simply counting the number of pieces is not effective as there can be very large swings in this value from turn to turn.  Another advantage of this evaluation function is that it tends to reduce the width of the search tree allowing for deeper searches.  This is because both players are trying to minimize each others moves, even if they are trying to maximize their own.  This leads to a trend of preferring lines that have a smaller branching factor.  Our code can be found at \url{https://github.com/dane-johnson/othello}.
+
+\section{Evaluation}
+We ran our benchmarks on Adams, which has an Intel(R) Xeon(R) CPU E5-4620 processor, 500GB of RAM, and a 16384K L3 cache.  Additionally, it has 4 NUMA nodes, although we did not make use of this as we were executing on vanilla Cilk and therefore didn't have an effective way of binding memory to NUMA nodes.  Our results were generated by running each algorithm 5 times as both black and white at each depth and taking the average of the running time for these games.  The games were played against an agent which simply picked a random move out of the available moves.  Although this is not a very good method for playing the game, we found that it generated more interesting games for comparing the different algorithms because it lead to a higher branching factor.  Between the random agent and grouping games played as white and black, our standard deviations were higher than we would otherwise prefer, however we were still able to get a good idea of the trends.
+\begin{thebibliography}{9}
+\bibitem{cpw}
+  Various Authors,
+  \textit{The Chess Programming Wiki},
+  \url{www.chessprogramming.org}
+\bibitem{jamb}
+  C. F. Joerg and B.C. Kuszmaul.
+  Massively Parallel Chess.
+  \textit{DIMACS '94}
+  October 1994.
+\end{thebibliography}
+
+\end{document}
+
+

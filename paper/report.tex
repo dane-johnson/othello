@@ -1,0 +1,141 @@
+\documentclass[]{article}
+
+\usepackage{fixltx2e}
+
+\usepackage{skak}
+
+\usepackage{algpseudocode}
+\MakeRobust{\Call}
+
+\author{Dane Johnson and Aaron Handlman}
+\date{12-21-2020}
+\title{Othello and Parallel Game-tree Search}
+
+\begin{document}
+\maketitle
+
+\section{Introduction}
+The game of Chess has always been captivating to game enthusiasts, and doubly so to computer scientists.
+Aaron and I were the latest in a laundry list of computer scientists who became interested in the game.
+Given that our research is in parallel computing, and seeing as we needed a project for this course, it
+was only natural that we decided to investigate how parallelism could be applied to the great game.
+\\ \\
+Game-tree search soon became our primary area of concern. It is an inherently serial algorithm,
+challenging to extend to multiple workers. With the intent to focus on search algorithms, we gravitated
+away from Chess towards Othello, a simpler game with only one type of piece. With this new interest,
+we decided our project would be one of implementation and analysis, the prospect of creating an entire
+Othello engine from scratch was a much more tractable problem.
+\\ \\
+Thanks in no small part to the Chess Programming Wiki \cite{cpw}, we were able to find a wide variety
+of Game-tree search algorithms to implement, and benchmark against each other for runtime and
+scalability.
+\section{Othello}
+Othello, or Reversi, is a game played by two players on an 8x8 grid, the same dimensions
+of a Chess board (and I will therefore use a Chess board to demonstrate the game), with disks that
+are white on one side and black on the other.
+The game is played by placing a disk of the player's color on the board, then flipping
+any disks that are sandwiched between and existing player's piece and the new one.
+With only a single type of move, Othello is a much easier engine to implement than Chess, but Game-tree
+search algorithms should be just as, if not more, effective at playing the game.
+\begin{figure}
+  \caption{The standard Othello start position}
+  \centering
+  \newgame
+\fenboard{8/8/8/3pP3/3Pp3/8/8/8 w - - 0 20}
+\showboard
+\end{figure}
+
+\begin{figure}
+  \caption{Play progresses after Black plays e6}
+  \centering
+  \newgame
+\fenboard{8/8/4p3/3pp3/3Pp3/8/8/8 w - - 0 20}
+\showboard
+\end{figure}
+
+\section{Algorithms}
+\subsection{Game-tree Search (Minimax)}
+The core of Game-tree search is looking through the search space trying to find the move that maximizes
+your chances of victory, under the assumption that your opponent will do the same in the opposite direction.
+Since theses spaces are intractably large, we choose some maximal depth, nodes searched, or time spent looking
+and then evaluate the board via some criteria (in Othello, how many more moves we have than our opponent).
+\begin{algorithmic}[1]
+  \Procedure{Minimax}{$node, depth$}
+  \If{$depth = 0$}
+  \State \Return \Call{Eval}{$node$}
+  \Else
+  \State $score \gets -\infty$
+  \ForAll{$c$, children of $node$}
+  \State $score \gets -$ \Call{Max}{$score$, \Call{Minimax}{$c, depth -1$}}
+  \EndFor
+  \State \Return $score$
+  \EndIf
+  \EndProcedure
+\end{algorithmic}
+\subsection{Alpha-Beta Pruning}
+Alpha-Beta pruning improves Game-tree search by keeping track of the highest and lowest values that
+are guaranteed to each player. If a move is found to be worse than a score guaranteed by these values, the search
+of that branch terminates early.
+\begin{algorithmic}[1]
+  \Procedure{AlphaBeta}{$node, depth, \alpha, \beta$}
+  \If{$depth = 0$}
+  \State \Return \Call{Eval}{$node$}
+  \Else
+  \State $score \gets -\infty$
+  \ForAll{$c$, children of $node$}
+  \State $score \gets -$ \Call{Max}{$score$, \Call{Minimax}{$c, depth -1, -\beta, -\alpha$}}
+  \State $\alpha \gets $ \Call{Max}{$score, \alpha$}
+  \If{$\alpha \geq \beta$}
+  \Comment {$\beta$ cutoff}
+  \State Break
+  \EndIf
+  \EndFor
+  \State \Return $score$
+  \EndIf
+  \EndProcedure
+\end{algorithmic}
+
+\subsection{Pricipal Variation Search}
+PVS improves further on Alpha-Beta pruning by assuming that the first child of a node
+is it's ``Principal Variation'', and that it is likely to be the best choice. It runs a
+search on the other children with a narrow window (the Scout window), so they will cut off if they generate
+a value that is smaller than the principle variation. This allows for even more aggressive
+pruning.
+\begin{algorithmic}[1]
+  \Procedure{PVS}{$node, depth, \alpha, \beta$}
+  \If{$depth = 0$}
+  \State \Return \Call{Eval}{$node$}
+  \Else
+  \ForAll{$c$, children of $node$}
+  \If{$c$ is the ``Principal Variation''}
+  \State $score \gets -$ \Call{Max}{$score$, \Call{Minimax}{$c, depth -1, -\beta, -\alpha$}}
+  \Else
+  \State $score \gets -$ \Call{Max}{$score$, \Call{Minimax}{$c, depth -1, -\alpha -1, -\alpha$}}
+  \Comment Scout window
+  \If {$\alpha < score$}
+  \EndIf
+    \State $score \gets -$ \Call{Max}{$score$, \Call{Minimax}{$c, depth -1, -\beta, -\alpha$}}
+    
+  \EndIf
+
+  \State $\alpha \gets $ \Call{Max}{$score, \alpha$}
+  \If{$\alpha \geq \beta$}
+  \Comment {$\beta$ cutoff}
+  \State Break
+  \EndIf
+  \EndFor
+  \State \Return $\alpha$
+  \EndIf
+  \EndProcedure
+\end{algorithmic}
+
+\begin{thebibliography}{9}
+\bibitem{cpw}
+  Various Authors,
+  \textit{The Chess Programming Wiki},
+  www.chessprogramming.org
+\end{thebibliography}
+
+\end{document}
+
+

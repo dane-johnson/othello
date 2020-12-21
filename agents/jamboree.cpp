@@ -41,19 +41,26 @@ int jamboree(Board board, int depth, int alpha, int beta) {
     alpha = value;
   }
   // Scout the remaining variations
-  bool failed = false;
+  int scouts[moves.size() - 1];
+  int cutoff = -1;
   cilk_for (int i = 1; i < moves.size(); i++) {
     int s = -jamboree(moves[i].second, depth -1, -alpha -1, -alpha);
-    if (s > value) {
-      failed = true;
-      //abort;
+    if (s >= beta) {
+      // Beta cutoff
+      cutoff = s;
+      abort;
     }
+    scouts[i - 1] = s;
   }
 
-  // If there was a failed scout, evaluate all variations in full
-  if (failed) {
-    for (int i = 1; i < moves.size(); i++) {
-      std::pair<int, Board> move = moves[i];
+  if (cutoff > 0) {
+    return cutoff;
+  }
+
+  // If there was a failed scout, evaluate the window in full
+  for (int i = 0; i < moves.size() - 1; i++) {
+    std::pair<int, Board> move = moves[i + 1];
+    if (scouts[i] > value) {
       value = std::max(value, -jamboree(move.second, depth -1, -beta, -alpha));
       alpha = std::max(alpha, value);
       if (alpha >= beta) { // Beta cutoff

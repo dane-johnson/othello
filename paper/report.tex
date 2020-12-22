@@ -177,7 +177,7 @@ We saw that at a depth of 11, SerialPVS searched an average of 221793 nodes per 
 
 
 \section{Future Work}
-For future work we'd like to start by solving some of our performance issues for Shared Hashtable.  With better performance we could add in additional algorithms that rely on a form of shared hashtable, such as ABDADA.  We'd also like to investigate how we could better tune the shared hashtable to be NUMA aware, although this is a far more difficult problem than we initially thought.  Even using a locality based runtime, we would still need a hueristic to figure out which boards are likely to collide on the hashtable and put those moves on the same NUMA node.  We'd also like to do further performance tuning, and implement a way to test the performance of different evaluation functions.
+For future work we'd like to start by solving some of our performance issues for Shared Hashtable.  With better performance we could add in additional algorithms that rely on a form of shared hashtable, such as ABDADA.  We'd also like to investigate how we could better tune the shared hashtable to be NUMA aware, although this is a far more difficult problem than we initially thought.  Even using a locality based runtime, we would still need a heuristic to figure out which boards are likely to collide on the hashtable and put those moves on the same NUMA node.  We'd also like to do further performance tuning, and implement a way to test the performance of different evaluation functions.
 \begin{thebibliography}{9}
 \bibitem{cpw}
   Various Authors,

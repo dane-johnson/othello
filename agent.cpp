@@ -7,10 +7,11 @@
 #include "agents/parallel_pvs.hpp"
 #include "agents/parallel_alphabeta.hpp"
 #include "agents/jamboree.hpp"
+#include "agents/first.hpp"
 #include <sstream>
 
-int numAgents = 8;
-Agent* agents[] = { new Human(),  new SerialPVS(), new AlphaBeta(), new SharedHashtable(), new RandomAgent(), new ParallelPVS(), new ParallelAlphaBeta(), new Jamboree()};
+int numAgents = 9;
+Agent* agents[] = { new Human(),  new SerialPVS(), new AlphaBeta(), new SharedHashtable(), new RandomAgent(), new ParallelPVS(), new ParallelAlphaBeta(), new Jamboree(), new FirstAgent()};
 
 Agent* getAgentOfType(std::string string) {
 	for (int i = 0; i < numAgents; i++) {

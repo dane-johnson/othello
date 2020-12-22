@@ -39,7 +39,7 @@ int ParallelAlphaBeta::findMove(Board board, int depth) {
     int score = -parallelalphabeta(std::get<Board>(move_pair), depth - 1, -MAX_VALUE - 1, MAX_VALUE DEBUG(, &nodes));
     best_move->calc_max(std::get<int>(move_pair), score);
   }
-  DEBUG(printf("%d nodes searched.\n", nodes);)
+  DEBUG(printf("%d\n", nodes);)
   DEBUG(std::cout << std::flush;)
   return best_move->get_index_reference();
 }

@@ -54,7 +54,7 @@ int SerialPVS::findMove(Board board, int depth) {
 			best_move = std::get<int>(move_pair);
 		}
 	}
-	DEBUG(printf("%d nodes searched.  Failed %d scouts out of %d scouts\n", nodes, failed_scouts, scouts);)
+	DEBUG(printf("%d\n", nodes);)
 	DEBUG(std::cout << std::flush;)
 	return best_move;
 }

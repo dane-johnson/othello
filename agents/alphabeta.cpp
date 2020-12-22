@@ -40,7 +40,7 @@ int AlphaBeta::findMove(Board board, int depth) {
       best_move = std::get<int>(move_pair);
     }
   }
-  DEBUG(printf("%d nodes searched.\n", nodes);)
+  DEBUG(printf("%d\n", nodes);)
   DEBUG(std::cout << std::flush;)
   return best_move;
 }

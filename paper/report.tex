@@ -180,24 +180,26 @@ We ran our benchmarks on Adams, which has an Intel(R) Xeon(R) CPU E5-4620 proces
 \section*{Experimental Results}
 We saw that at a depth of 11, SerialPVS searched an average of 221793 nodes per turn, ParallelPVS search an average of 2081209 nodes per turn.  This is due to the drastically reduced trimming based on less information gained.  AlphaBeta searched an average of 602914 nodes, while ParallelAlphaBeta searched 5743813 nodes.  This corresponds to a roughly 10x increase in the number of nodes searched by parallelizing the algorithm.  Our benchmarks compare the various parallel algorithms.  As expected, ParallelPVS consistently outperforms ParallelAlphaBeta.  However, we see mixed results when compared to Jamboree at lower thread counts.  We attribute this mainly to the spawn overhead of Jamboree.  However, since Jamboree is enabling more parallelism, this additional spawn overhead is less impactful as we reach higher worker counts.  Our only unexplained result is Jamboree's strange slowdown at a depth of 11.  This could be a side effect of using a random agent to test the algorithm or it could be caused by an abnormal number of failed scout attempts.
 \begin{figure}[h]
-\begin{subfigure}[b]{0.5\textwidth}
-\includegraphics[width=\textwidth]{depth9.png}
-\end{subfigure}
-\begin{subfigure}[b]{0.5\textwidth}
-\includegraphics[width=\textwidth]{depth10.png}
-\end{subfigure}
-\begin{subfigure}[b]{0.5\textwidth}
-\includegraphics[width=\textwidth]{depth11.png}
-\end{subfigure}
-\begin{subfigure}[b]{0.5\textwidth}
-\includegraphics[width=\textwidth]{depth12.png}
-\end{subfigure}
-\caption{Runtimes at various depths}
+  \hspace*{-0.1\textwidth}
+  \begin{subfigure}[b]{0.6\textwidth}
+    \includegraphics[width=\textwidth]{depth9.png}
+  \end{subfigure}
+  \begin{subfigure}[b]{0.6\textwidth}
+    \includegraphics[width=\textwidth]{depth10.png}
+  \end{subfigure}
+  \hspace*{-0.1\textwidth}
+  \begin{subfigure}[b]{0.6\textwidth}
+    \includegraphics[width=\textwidth]{depth11.png}
+  \end{subfigure}
+  \begin{subfigure}[b]{0.6\textwidth}
+    \includegraphics[width=\textwidth]{depth12.png}
+  \end{subfigure}
+  \caption{Runtimes at various depths}
 \end{figure}
 \begin{figure}[t]
-\includegraphics[width=0.8\textwidth]{depth_speedup.png}
-\centering
-\caption{Scalability at different depths}
+  \includegraphics[width=0.8\textwidth]{depth_speedup.png}
+  \centering
+  \caption{Scalability at different depths}
 \end{figure}
 
 
